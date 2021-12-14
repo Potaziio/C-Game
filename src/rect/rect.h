@@ -13,6 +13,8 @@ struct Rect {
     struct iVec2f position, scale;
     struct iVec4f color;
 
+    int wasInitialized;
+
     float vertices[28];
     unsigned int indices[6];
 

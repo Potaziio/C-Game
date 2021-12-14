@@ -7,7 +7,6 @@
 #define GLFW_INCLUDE_NONE
 #include "../../libs/glfw-3.3.5/include/GLFW/glfw3.h"
 
-
 #define MOUSEBUTTONS (int)sizeof mouseButtonPressed / (int)sizeof mouseButtonPressed[0]
 
 #define KEYBOARDKEYS (int)sizeof keyPressed / (int)sizeof keyPressed[0]
@@ -50,13 +49,13 @@ static float lastCursorY;
 static float mWheelOffset;
 
 /* returns 1 while a mouse button is pressed */
-int InputGetMouseButtonHold(int button);
+int InputMouseButtonHold(int button);
 
 /* returns 1 only once upon a mouse click */
-int InputGetMouseButtonDown(int button);
+int InputMouseButtonDown(int button);
 
 /* returns 1 only once upon a mouse button is released */
-int InputGetMouseButtonUp(int button);
+int InputMouseButtonUp(int button);
 
 /* sets given x and y to the mousepos */
 void InputGetMousePos(float* x, float* y);

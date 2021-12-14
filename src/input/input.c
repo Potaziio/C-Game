@@ -74,15 +74,15 @@ void InputMouseScrollCallback(GLFWwindow* window, double xOffset, double yOffset
     mWheelOffset = yOffset;
 }
 
-int InputGetMouseButtonHold(int button) {
+int InputMouseButtonHold(int button) {
     return mouseButtonPressed[button]; 
 }
 
-int InputGetMouseButtonDown(int button) {
+int InputMouseButtonDown(int button) {
     return mouseButtonClicked[button];
 }
 
-int InputGetMouseButtonUp(int button) {
+int InputMouseButtonUp(int button) {
     return mouseButtonReleased[button];
 }
 

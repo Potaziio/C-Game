@@ -1,18 +1,22 @@
 #include "rect.h"
 
 void createRect(struct Rect* rect, struct Shader* shader, float x, float y, float w, float h, float r, float g, float b, float a) {
-    rect->position.x = x;
-    rect->position.y = y;
+    if (!rect->wasInitialized) {
+        rect->wasInitialized = 1;
 
-    rect->scale.x = w;
-    rect->scale.y = h;
+        rect->position.x = x;
+        rect->position.y = y;
 
-    rect->color.x = r;
-    rect->color.y = g;
-    rect->color.z = b;
-    rect->color.w = a;
+        rect->scale.x = w;
+        rect->scale.y = h;
 
-    rectInit(rect, shader);
+        rect->color.x = r;
+        rect->color.y = g;
+        rect->color.z = b;
+        rect->color.w = a;
+
+        rectInit(rect, shader);
+    }
 }
 
 void genRectVertices(struct Rect* rect) {
@@ -88,6 +92,8 @@ void rectInit(struct Rect* rect, struct Shader* shader) {
 }
 
 void rectRender(struct Rect* rect) {
+    if (!rect->wasInitialized) {return;}
+
     vec3 transform;
     transform[0] = rect->position.x;
     transform[1] = rect->position.y;

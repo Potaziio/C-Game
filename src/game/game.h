@@ -16,14 +16,26 @@
 
 #include "../shader/shader.h"
 #include "../rect/rect.h"
+#include "../rect/aabb.h"
 
 #include "../input/input.h"
+#include "../math/mathutils.h"
 
 #include "../camera/camera.h"
 
-static int win_width, win_height;
+#define MAX_ENTITIES 100
+
+static int entitiesInGame = 0;
+
+static struct Rect** entities;
+
+void addEntity(struct Rect* entity, struct Shader* shader, float x, float y, float scaleX, float scaleY, float r, float g, float b, float a);
+void removeEntity(struct Rect* entity);
+
+void renderRects();
 
 void gameUpdate(float deltaTime);
 void gameStart();
+void freeGameMemory();
 
 #endif /* ifndef GAME_H */

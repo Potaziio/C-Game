@@ -3,8 +3,6 @@
 // Just some glfw window boilerplate code
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
-    win_width = width;
-    win_height = height;
     glViewport(0, 0, width, height);
 }
 
@@ -21,9 +19,6 @@ void CreateWindow(struct Window* window) {
     glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
 
     window->window = glfwCreateWindow(window->width, window->height, window->name, NULL, NULL);
-
-    win_width = window->width;
-    win_height = window->height;
 
     if (!window) {
         glfwTerminate();
@@ -48,6 +43,9 @@ void CreateWindow(struct Window* window) {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // Seed srand
+    srand(time(NULL));
 }
 
 void WindowLoop(struct Window* window) {
@@ -75,6 +73,8 @@ void WindowLoop(struct Window* window) {
         endKeyInputFrame();
         endMouseInputFrame();
     }
+
+    freeGameMemory();
 
     glfwTerminate();
     glfwDestroyWindow(window->window);

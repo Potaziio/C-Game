@@ -1,17 +1,17 @@
 #include "time.h"
 
-void timeInit(struct Time* time) {
+void timeInit(Time* time) {
     time->p_startTime = (float)glfwGetTime();
 }
 
-void timeUpdate(struct Time* time) {
+void timeUpdate(Time* time) {
     time->p_lastTime = (float)glfwGetTime();
     time->dt = time->p_lastTime - time->p_startTime;
     time->p_startTime = (float)glfwGetTime();
 }
 
-float deltaTime(struct Time* time) {
-    return time->dt;
+float deltaTime(Time time) {
+    return time.dt;
 }
 
 float getMilliSeconds() {

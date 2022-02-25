@@ -1,6 +1,6 @@
 #include "shader.h"
 
-void shaderInit(struct Shader* shader, char* vertexFilepath, char* fragmentFilepath) {
+void shaderInit(Shader* shader, char* vertexFilepath, char* fragmentFilepath) {
     char* buffer; 
     long lSize;
     
@@ -97,22 +97,22 @@ void shaderInit(struct Shader* shader, char* vertexFilepath, char* fragmentFilep
     free(buffer);
 }
 
-void useShader(struct Shader* shader) {
+void useShader(Shader* shader) {
     if (!shader->beingUsed) {
        glUseProgram(shader->shaderID);
        shader->beingUsed = 1;
     }
 }
 
-void detachShader(struct Shader* shader) {
+void detachShader(Shader* shader) {
     glUseProgram(0);
     shader->beingUsed = 0;
 }
 
-void sentInt2Shader(struct Shader shader, const char* varName, int val);
-void sendFloat2Shader(struct Shader shader, const char* varName, float val);
+void sentInt2Shader(Shader shader, const char* varName, int val);
+void sendFloat2Shader(Shader shader, const char* varName, float val);
 
-void sendMat42Shader(struct Shader* shader, const char* varName, mat4 val) {
+void sendMat42Shader(Shader* shader, const char* varName, mat4 val) {
     useShader(shader);
     glUniformMatrix4fv(glGetUniformLocation(shader->shaderID, varName), 1, GL_FALSE, (float*)val);
     detachShader(shader);

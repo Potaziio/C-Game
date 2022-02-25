@@ -4,8 +4,8 @@
 
 //TODO: Implement ivec2-ivec2 mult
 
-struct iVec2f iVec2fMultF(struct iVec2f vec, float val) {
-    struct iVec2f result = {
+iVec2f iVec2fMultF(iVec2f vec, float val) {
+    iVec2f result = {
         .x = vec.x * val,
         .y = vec.y * val,
     };
@@ -13,13 +13,13 @@ struct iVec2f iVec2fMultF(struct iVec2f vec, float val) {
     return result;
 }
 
-struct iVec2f iVec2fSumV(struct iVec2f vec, struct iVec2f vec2) {
-    struct iVec2f result = {.x = vec.x + vec2.x, .y = vec.y + vec2.y,};
+iVec2f iVec2fSumV(iVec2f vec, iVec2f vec2) {
+    iVec2f result = {.x = vec.x + vec2.x, .y = vec.y + vec2.y,};
     return result;
 }
 
-struct iVec2f iVec2fMultV(struct iVec2f vec, struct iVec2f vec2) {
-    struct iVec2f result = {
+iVec2f iVec2fMultV(iVec2f vec, iVec2f vec2) {
+    iVec2f result = {
         .x = vec.x * vec2.x,
         .y = vec.y * vec2.y,
     };
@@ -27,12 +27,17 @@ struct iVec2f iVec2fMultV(struct iVec2f vec, struct iVec2f vec2) {
     return result;
 }
 
-void iVec2fIncV(struct iVec2f* vec, struct iVec2f vec2) {
+float iVec2fDist(iVec2f vec1, iVec2f vec2) {
+    return sqrt((vec1.x - vec2.x) * (vec1.x - vec2.x) + 
+            (vec1.y - vec2.y) * (vec1.y - vec2.y));
+}
+
+void iVec2fIncV(iVec2f* vec, iVec2f vec2) {
     vec->x += vec2.x;
     vec->y += vec2.y;
 }
 
-void iVec2fNorm(struct iVec2f* vec) {
+void iVec2fNorm(iVec2f* vec) {
     float mag = sqrt((vec->x * vec->x) + (vec->y * vec->y));
 
     if (mag > 0.0f) {
@@ -41,20 +46,20 @@ void iVec2fNorm(struct iVec2f* vec) {
     } 
 }
 
-struct iVec2f iVec2fLerp(struct iVec2f source, struct iVec2f target, float speed) {
-    struct iVec2f sourceSpeed = iVec2fMultF(source, 1.0f - speed);
-    struct iVec2f targSpeed = iVec2fMultF(target, speed);
+iVec2f iVec2fLerp(iVec2f source, iVec2f target, float speed) {
+    iVec2f sourceSpeed = iVec2fMultF(source, 1.0f - speed);
+    iVec2f targSpeed = iVec2fMultF(target, speed);
 
     return iVec2fSumV(sourceSpeed, targSpeed);
 }
 
-float iVec2fMag(struct iVec2f vec) {
+float iVec2fMag(iVec2f vec) {
     float mag = sqrt((vec.x * vec.x) + (vec.y * vec.y));
     return mag; 
 }
 
-struct iVec2f iVec2fDiff(struct iVec2f vec, struct iVec2f target) {
-    struct iVec2f distance = {
+iVec2f iVec2fDiff(iVec2f vec, iVec2f target) {
+    iVec2f distance = {
         .x = vec.x - target.x,
         .y = vec.y - target.y,
     };
@@ -65,7 +70,7 @@ struct iVec2f iVec2fDiff(struct iVec2f vec, struct iVec2f target) {
 
 // iVec3f
 
-void iVec3fNorm(struct iVec3f* vec) {
+void iVec3fNorm(iVec3f* vec) {
     float mag = sqrt((vec->x * vec->x) + (vec->y * vec->y) + (vec->z * vec->z));
 
     vec->x /= mag;
@@ -77,6 +82,6 @@ void iVec3fNorm(struct iVec3f* vec) {
 
 //iVec4f 
 
-void iVec4fNorm(struct iVec4f* vec) {
+void iVec4fNorm(iVec4f* vec) {
 
 }

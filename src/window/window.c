@@ -4,6 +4,10 @@
 
 void frameBufferSizeCallback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
+
+    struct Window* win = (struct Window*)glfwGetWindowUserPointer(window);
+    win->width = width;
+    win->height = height;
 }
 
 void CreateWindow(struct Window* window) {
@@ -14,6 +18,8 @@ void CreateWindow(struct Window* window) {
     }
 
     // WINDOW FLAGS
+
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
@@ -35,7 +41,9 @@ void CreateWindow(struct Window* window) {
         fprintf(stderr, "ERROR::GLEW::INIT::FAILED -> %s\n", glewGetErrorString(err));
     }
 
-    /* glfwSetFramebufferSizeCallback(window->window, frameBufferSizeCallback); */
+    glfwSetWindowUserPointer(window->window, (void*)window);
+
+    glfwSetFramebufferSizeCallback(window->window, frameBufferSizeCallback);
     glfwSetCursorPosCallback(window->window, InputMouseCursorCallback); 
     glfwSetScrollCallback(window->window, InputMouseScrollCallback);
     glfwSetMouseButtonCallback(window->window, InputMouseButtonCallback);
@@ -49,12 +57,19 @@ void CreateWindow(struct Window* window) {
 }
 
 void WindowLoop(struct Window* window) {
+    Time time;
 
-    gameStart();
+    window->game.camera.x = 0.0f;
+    window->game.camera.y = 0.0f;
+    window->game.camera.boundsX = window->width;
+    window->game.camera.boundsY = window->height;
+    window->game.time = time;
 
-    struct Time time;
+    gameStart(&window->game);
 
-    timeInit(&time); 
+    timeInit(&window->game.time);
+
+    float t = 1.0f;
 
     while(!glfwWindowShouldClose(window->window)) {
         glfwPollEvents();
@@ -66,15 +81,27 @@ void WindowLoop(struct Window* window) {
             break;
         }
 
-        gameUpdate(deltaTime(&time));
+        gameUpdate(&window->game);
+
+        /* Prints FPS */
+
+        if (t <= 0.0f) {
+            /* printf("FPS: %.1f\n", (0.001f / (deltaTime(window->game.time) / 1000.0f))); */
+            t = 1.0f;
+        } else {
+            t -= deltaTime(window->game.time);
+        }
+
+        window->game.camera.boundsX = window->width;
+        window->game.camera.boundsY = window->height;
 
         glfwSwapBuffers(window->window);
-        timeUpdate(&time);
+        timeUpdate(&window->game.time);
         endKeyInputFrame();
         endMouseInputFrame();
     }
 
-    freeGameMemory();
+    freeGameMemory(&window->game);
 
     glfwTerminate();
     glfwDestroyWindow(window->window);

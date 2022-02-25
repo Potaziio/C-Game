@@ -14,6 +14,7 @@ find_package(OpenGL REQUIRED)
 file (GLOB KATANA_SOURCE_FILES
     "src/*.c"
     "src/*/*.c"
+    "src/*/*/*.c"
     )
 
 file(GLOB GLEW_SOURCES

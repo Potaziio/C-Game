@@ -7,9 +7,10 @@
 #include "../math/vec.h"
 #include "../util/util.h"
 
-#include "../game/game.h"
 #include "../time/time.h"
 #include "../input/input.h"
+
+#include "../game/game.h"
 
 #include "../../libs/glew-2.2.0/include/GL/glew.h"
 #include "../../libs/glfw-3.3.5/include/GLFW/glfw3.h"
@@ -19,6 +20,7 @@ struct Window {
     int width;
     int height;
     const char* name;
+    Game game;
 };
 
 void CreateWindow(struct Window* window);

@@ -1,177 +1,86 @@
 #include "game.h"
 
-// TODO: Learn more about c arrays and create a dynamic gameObject array to add and remove rects from the screen  
-// TODO: automatic shader loading and initialization functions
+Shader shader;
+Shader texturedShader;
 
-#define SCREEN_WIDTH 1600
-#define SCREEN_HEIGHT 1000
+// TODO: Implement textures
+// TODO: Create static object batching,
 
-#define MAX_SNAKE_SIZE 100
-
-#define SNAKE_HEAD 0
-
-int currentSnakeSize = 0;
-
-struct Shader shader;
-
-struct Camera camera = {
-    .x = 0.0f,
-    .y = 0.0f,
+Rect Player = {
+    .position = { 0.0f, 0.0f },
+    .scale = { 20.0f, 20.0f },
+    .color = { RGBANORM(255.0f, 255.0f, 255.0f, 255.0f) }
 };
 
-struct Rect* snake;
+Rect Enemy = {
+    .position = { -2500.0f, 300.0f },
+    .scale = { 2500.0f, 25.0f },
+    .color = { RGBANORM(255.0f, 0.0f, 0.0f, 255.0f)},
+};
 
-struct Rect food;
+Shader* shaders[] = {
+    &shader
+};
 
-void addEntity(struct Rect* entity, struct Shader* shader, float x, float y, float scaleX, float scaleY, float r, float g, float b, float a) {
-    createRect(entity, shader, x, y, scaleX, scaleY, r, g, b, a); 
-    entities[entitiesInGame] = entity;
-    entitiesInGame++;
+void gameStart(Game* game) {
+    shaderInit(&shader, "../assets/shaders/square.vs", 
+            "../assets/shaders/square.fs");
+
+    rectInit(&Player, &shader);
+    rectInit(&Enemy, &shader);
 }
 
-void removeEntity(struct Rect* entity) {
-    if (entity == NULL)  { return; }
-
-    for (int i = 0; i < entitiesInGame; ++i) {
-        if (entities[i] == entity) {
-
-            // Replace this entity by the next in order if there is any.
-            // This also moves down any following entities.
-            
-            if (entities[i + 1] != NULL) {
-                entities[i] = entities[i + 1];
-                entities[i + 1] = 0;
-
-                for (int j = i + 1; j < entitiesInGame; ++j) {
-                    if (entities[j + 1] != NULL) {
-                        entities[j] = entities[j + 1];
-                        entities[j + 1] = 0;
-                    }
-                }
-            } else {
-                entities[i] = 0;
-            }
-
-            entitiesInGame--;
-        }
-    }
+bool AABBCollision(Rect a, Rect b) {
+    return a.position.x + a.scale.x > b.position.x &&
+        a.position.x < b.position.x + b.scale.x && 
+        a.position.y + a.scale.y > b.position.y && 
+        a.position.y < b.position.y + b.scale.y;
 }
 
-void renderRects() {
-    for (int i = 0; i < entitiesInGame; ++i) {
-       rectRender(entities[i]); 
-    }
-}
+float yAccel = 0.0f;
 
-void gameStart() {
-    shaderInit(&shader, "../assets/shaders/square.vs", "../assets/shaders/square.fs");
-    entities = (struct Rect**)calloc(MAX_ENTITIES, sizeof(struct Rect*));
-    snake = (struct Rect*)calloc(MAX_SNAKE_SIZE, sizeof(struct Rect));
+void gameUpdate(Game* game) {
+    glClearColor(0.1f, 0.1f, 0.1f, 255.0f);
+    iVec2f movement = { InputGetAxisRaw("Horizontal"), 0.0f };
+    iVec2fNorm(&movement);
+	
+    iVec2fIncV(&Player.position, iVec2fMultF(iVec2fMultF(movement, 
+                    deltaTime(game->time)), 500.0f));
 
-    addEntity(&food, &shader, 
-            randFloat(0.0f, SCREEN_WIDTH), randFloat(0.0f, SCREEN_HEIGHT), 
-            20.0f, 20.0f, 
-            RGBANORM(255.0f, 0.0f, 0.0f, 155.0f));
-
-    addEntity(&snake[SNAKE_HEAD], &shader, 0.0f, 100.0f, 
-            30.0f, 30.0f, 
-            RGBANORM(0.0f, 0.0f, 255.0f, 255.0f));
-}
-
-int lastMoveX = 1;
-int lastMoveY;
-
-int snakeSpeed = 150;
-
-float currentMoveTime = 0.0f;
-float moveTimer = 0.07f;
-
-int snakeDead = 0;
-
-void gameUpdate(float deltaTime) {
-    glClearColor(RGBANORM(0.0, 0.0f, 0.0f, 255.0f));
-
-    // Horizontal Movement
-
-    if (InputGetKeyDown(GLFW_KEY_RIGHT) && lastMoveX != -1) {
-        lastMoveX = 1;
-        lastMoveY = 0;
-    } else if(InputGetKeyDown(GLFW_KEY_LEFT) && lastMoveX != 1) {
-        lastMoveX = -1;
-        lastMoveY = 0;
-    }
-
-    // Vertical Movement
-
-    if (InputGetKeyDown(GLFW_KEY_UP) && lastMoveY != 1) {
-        lastMoveY = -1;
-        lastMoveX = 0;
-    } else if(InputGetKeyDown(GLFW_KEY_DOWN) && lastMoveY != -1) {
-        lastMoveY = 1;
-        lastMoveX = 0;
-    }
-
-    struct iVec2f movement = {
-        .x = lastMoveX * 30.0f,
-        .y = lastMoveY * 30.0f,
-    };
-
-    // Player Movement Update
-
-    if (currentMoveTime > 0.0f) {
-        currentMoveTime -= deltaTime;
-    } 
-
-    if (!snakeDead) {
-
-        if (currentMoveTime <= 0.0f) {
-            currentMoveTime = moveTimer;
-
-            if (AABB(snake[SNAKE_HEAD], food)) {
-                struct iVec2f newFoodPos = {
-                    .x = randFloat(0.0f, SCREEN_WIDTH - 50),
-                    .y = randFloat(0.0f, SCREEN_HEIGHT - 50),
-                };
-
-                food.position = newFoodPos;
-
-                currentSnakeSize++;
-
-                addEntity(&snake[currentSnakeSize], &shader,
-                        snake[currentSnakeSize - 1].position.x, snake[currentSnakeSize - 1].position.y, 
-                        snake[SNAKE_HEAD].scale.x, snake[SNAKE_HEAD].scale.y, 
-                        RGBANORM(255.0f, 255.0f, 255.0f, 255.0f));
-            }
-
-            for (int i = currentSnakeSize; i > 0; --i) {
-                snake[i].position = snake[i - 1].position; 
-            }
-
-            iVec2fIncV(&snake[SNAKE_HEAD].position, movement);
-
-            // Checking wall and body collision
-
-            for (int i = 1; i < currentSnakeSize + 1; ++i) {
-                if (AABB(snake[SNAKE_HEAD], snake[i])) {
-                    snakeDead = 1; 
-                }
-            }
-
-            if (snake[SNAKE_HEAD].position.x < -20.0f || 
-                    snake[SNAKE_HEAD].position.x > 1620.0f ||
-                    snake[SNAKE_HEAD].position.y > 1020.0f ||
-                    snake[SNAKE_HEAD].position.y < -20.0f) {
-
-                snakeDead = 1;
-            }
+    if (AABBCollision(Player, Enemy)) {
+        if (movement.x > 0.0f) {
+            Player.position.x = Enemy.position.x - Player.scale.x;
+        } else if (movement.x < 0.0f) {
+            Player.position.x = Enemy.position.x + Enemy.scale.x;
         }
     }
 
-    cameraUpdate(&camera, &shader);
-    renderRects();
+    Player.position.y -= yAccel;
+    yAccel -= deltaTime(game->time) * 9.81 / 1.5;
+
+    if (AABBCollision(Player, Enemy)) {
+        if (movement.y < 0.0f) {
+            Player.position.y = Enemy.position.y + Enemy.scale.y; 
+        } else if (movement.y > 0.0f) {
+            Player.position.y = Enemy.position.y - Player.scale.y;
+        }
+
+        yAccel = 0.0f;
+    }
+
+    iVec2f cameraPos = { game->camera.x, game->camera.y };
+    iVec2f cameraTarget = { (Player.position.x + 30.0f) - game->camera.boundsX * 0.5f, (Player.position.y + 10.0f) - game->camera.boundsY * 0.5f};
+    iVec2f lerpPos = iVec2fLerp(cameraPos, cameraTarget, 5.0f * deltaTime(game->time));
+
+    game->camera.x = lerpPos.x;
+    game->camera.y = lerpPos.y;
+	
+    cameraUpdate(&game->camera, shaders, 1);
+	
+    rectRender(&Player);
+    rectRender(&Enemy);
 }
 
-void freeGameMemory() {
-    free(entities);
-    free(snake);
+void freeGameMemory(Game* game) {
+    free(game->entities.array);
 }

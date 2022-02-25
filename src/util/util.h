@@ -6,4 +6,13 @@
 #define unimplemented() printf("This function '%s' is unimplemented...", __FUNCTION__); \
     exit(1)
 
+typedef struct  {
+    float r;
+    float g;
+    float b;
+    float a;
+} RGBA_Color;
+
+
+
 #endif /* ifndef UTIL_H */

@@ -1,6 +1,6 @@
 #include "rect.h"
 
-void createRect(struct Rect* rect, struct Shader* shader, float x, float y, float w, float h, float r, float g, float b, float a) {
+void createRect(Rect* rect, Shader* shader, float x, float y, float w, float h, float r, float g, float b, float a) {
     if (!rect->wasInitialized) {
         rect->wasInitialized = 1;
 
@@ -10,20 +10,20 @@ void createRect(struct Rect* rect, struct Shader* shader, float x, float y, floa
         rect->scale.x = w;
         rect->scale.y = h;
 
-        rect->color.x = r;
-        rect->color.y = g;
-        rect->color.z = b;
-        rect->color.w = a;
+        rect->color.r = r;
+        rect->color.g = g;
+        rect->color.b = b;
+        rect->color.a = a;
 
         rectInit(rect, shader);
     }
 }
 
-void genRectVertices(struct Rect* rect) {
-    float r = rect->color.x;
-    float g = rect->color.y;
-    float b = rect->color.z;
-    float a = rect->color.w;
+void genRectVertices(Rect* rect) {
+    float r = rect->color.r;
+    float g = rect->color.g;
+    float b = rect->color.b;
+    float a = rect->color.a;
 
     rect->vertices[0] = 0.0f;
     rect->vertices[1] = 0.0f;
@@ -66,7 +66,8 @@ void genRectVertices(struct Rect* rect) {
     rect->indices[5] = 1;
 }
 
-void rectInit(struct Rect* rect, struct Shader* shader) {
+void rectInit(Rect* rect, Shader* shader) {
+    rect->wasInitialized = 1;
     rect->shader = shader;
     genRectVertices(rect);
 
@@ -77,10 +78,10 @@ void rectInit(struct Rect* rect, struct Shader* shader) {
     glBindVertexArray(rect->VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, rect->VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(rect->vertices), rect->vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(rect->vertices), rect->vertices, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rect->EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rect->indices), rect->indices, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(rect->indices), rect->indices, GL_DYNAMIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -91,7 +92,7 @@ void rectInit(struct Rect* rect, struct Shader* shader) {
     glBindVertexArray(0);
 }
 
-void rectRender(struct Rect* rect) {
+void rectRender(Rect* rect) {
     if (!rect->wasInitialized) {return;}
 
     vec3 transform;

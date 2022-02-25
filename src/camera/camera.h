@@ -8,13 +8,16 @@
 
 #include "../shader/shader.h"
 
-struct Camera {
+typedef struct {
     float x;
     float y;
+
+    float boundsX;
+    float boundsY;
     
     mat4 viewMatrix, projectionMatrix;
-};
+} Camera;
 
-void cameraUpdate(struct Camera* camera, struct Shader* shader);
+void cameraUpdate(Camera* camera, Shader** shader, int size);
 
 #endif /* ifndef CAMERA_H */

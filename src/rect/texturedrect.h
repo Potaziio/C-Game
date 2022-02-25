@@ -1,5 +1,5 @@
-#ifndef RECT_H
-#define RECT_H value
+#ifndef TEXTURED_RECT_H
+#define TEXTURED_RECT_H
 
 #include "../../libs/cglm/include/cglm/cglm.h"
 #include "../../libs/cglm/include/cglm/mat4.h"
@@ -8,26 +8,26 @@
 
 #include "../math/vec.h"
 #include "../shader/shader.h"
+#include "../texture/texture.h"
 #include "../util/util.h"
 
 typedef struct {
     iVec2f position, scale;
-    RGBA_Color color;
-
+    Texture sprite;
+	
     int wasInitialized;
-
-    float vertices[28];
+	
+    float vertices[20];
     unsigned int indices[6];
-
+	
     unsigned int VAO, EBO, VBO;
-
+	
     mat4 p_modelMatrix;
     Shader* shader;
-} Rect;
+} TexturedRect;
 
-void genRectVertices(Rect* rect);
-void rectInit(Rect* rect, Shader* shader);
-void rectRender(Rect* rect);
-void createRect(Rect* rect, Shader* shader, float x, float y, float w, float h, float r, float g, float b, float a);
+void genTexturedRectVertices(TexturedRect* rect);
+void texturedRectInit(TexturedRect* rect, Shader* shader);
+void texturedRectRender(TexturedRect* rect);
 
-#endif /* ifndef RECT_H */
+#endif // TEXTURED_RECT_H

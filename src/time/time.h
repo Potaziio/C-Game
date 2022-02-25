@@ -4,16 +4,16 @@
 #define GLFW_INCLUDE_NONE
 #include "../../libs/glfw-3.3.5/include/GLFW/glfw3.h"
 
-struct Time {
+typedef struct {
     float p_startTime;
     float p_lastTime;
     float dt;
-};
+} Time;
 
-void timeInit(struct Time* time);
-void timeUpdate(struct Time* time);
+void timeInit(Time* time);
+void timeUpdate(Time* time);
 
-float deltaTime(struct Time* time);
+float deltaTime(Time time);
 float getMilliSeconds();
 
 #endif /* ifndef TIME_H */

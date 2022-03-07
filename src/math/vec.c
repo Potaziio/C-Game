@@ -13,6 +13,10 @@ iVec2f iVec2fMultF(iVec2f vec, float val) {
     return result;
 }
 
+int iVec2fCmp(iVec2f vec1, iVec2f vec2) {
+    return vec1.x == vec2.x && vec1.y == vec2.y;
+}
+
 iVec2f iVec2fSumV(iVec2f vec, iVec2f vec2) {
     iVec2f result = {.x = vec.x + vec2.x, .y = vec.y + vec2.y,};
     return result;
@@ -35,6 +39,11 @@ float iVec2fDist(iVec2f vec1, iVec2f vec2) {
 void iVec2fIncV(iVec2f* vec, iVec2f vec2) {
     vec->x += vec2.x;
     vec->y += vec2.y;
+}
+
+void iVec2fDecV(iVec2f* vec, iVec2f vec2) {
+    vec->x -= vec2.x;
+    vec->y -= vec2.y;
 }
 
 void iVec2fNorm(iVec2f* vec) {

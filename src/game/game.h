@@ -13,6 +13,9 @@
 #include "../camera/camera.h"
 #include "../util/dynamicarray.h"
 #include "../texture/texture.h"
+#include "../util/color.h"
+#include "entities/player/player.h"
+#include "../window/window.h"
 
 #include "../../libs/glew-2.2.0/include/GL/glew.h"
 #define GLFW_INCLUDE_NONE
@@ -23,12 +26,18 @@
 #include "../../libs/cglm/include/cglm/vec3.h"
 #include "../../libs/cglm/include/cglm/vec2.h"
 
-typedef struct {
+struct Window; 
+
+typedef struct Game {
+    struct Window* window;
+    Player player;
     Camera camera;
     Time time;
     DRectArray entities;
 } Game;
 
+void gameResolveAllCollisions(Player* player, DRectArray entities);
+void gameSetWindow(Game* game, struct Window* window);
 void gameUpdate(Game* game);
 void gameStart(Game* game);
 void freeGameMemory(Game* game);

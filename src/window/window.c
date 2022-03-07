@@ -54,20 +54,34 @@ void CreateWindow(struct Window* window) {
 
     // Seed srand
     srand(time(NULL));
+
+    window->color = (NormColor){ 0.0f, 0.0f, 0.0f, 1.0f };
 }
 
 void WindowLoop(struct Window* window) {
     Time time;
 
-    window->game.camera.x = 0.0f;
-    window->game.camera.y = 0.0f;
-    window->game.camera.boundsX = window->width;
-    window->game.camera.boundsY = window->height;
-    window->game.time = time;
+    window->game = (Game*)malloc(sizeof(Game));
 
-    gameStart(&window->game);
+    window->game->camera.x = 0.0f;
+    window->game->camera.y = 0.0f;
+    window->game->camera.boundsX = window->width;
+    window->game->camera.boundsY = window->height;
+    window->game->time = time;
 
-    timeInit(&window->game.time);
+    // Init game stuff
+    
+    AllocRectArray(&window->game->entities, 0);
+
+    gameStart(window->game);
+
+    for (int i = 0; i < window->game->entities.size; i++) {
+        rectInit(window->game->entities.array[i]);
+    }
+
+    gameSetWindow(window->game, window);
+
+    timeInit(&window->game->time);
 
     float t = 1.0f;
 
@@ -75,33 +89,40 @@ void WindowLoop(struct Window* window) {
         glfwPollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(window->color.r, window->color.g, window->color.b, window->color.a);
 
         if (InputGetKeyDown(GLFW_KEY_ESCAPE)) {
             printf("Exiting..\n");
             break;
         }
 
-        gameUpdate(&window->game);
+        gameUpdate(window->game);
+
+        // Rendering
+        
+        for (int i = 0; i < window->game->entities.size; i++) {
+            rectRender(window->game->entities.array[i]);
+        }
+
 
         /* Prints FPS */
 
         if (t <= 0.0f) {
-            /* printf("FPS: %.1f\n", (0.001f / (deltaTime(window->game.time) / 1000.0f))); */
+            printf("FPS: %.1f\n", (0.001f / (deltaTime(window->game->time) / 1000.0f)));
             t = 1.0f;
         } else {
-            t -= deltaTime(window->game.time);
+            t -= deltaTime(window->game->time);
         }
 
-        window->game.camera.boundsX = window->width;
-        window->game.camera.boundsY = window->height;
+        window->game->camera.boundsX = window->width;
+        window->game->camera.boundsY = window->height;
 
         glfwSwapBuffers(window->window);
-        timeUpdate(&window->game.time);
+        timeUpdate(&window->game->time);
         endKeyInputFrame();
         endMouseInputFrame();
     }
-
-    freeGameMemory(&window->game);
+    freeGameMemory(window->game);
 
     glfwTerminate();
     glfwDestroyWindow(window->window);

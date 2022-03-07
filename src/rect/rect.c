@@ -1,24 +1,5 @@
 #include "rect.h"
 
-void createRect(Rect* rect, Shader* shader, float x, float y, float w, float h, float r, float g, float b, float a) {
-    if (!rect->wasInitialized) {
-        rect->wasInitialized = 1;
-
-        rect->position.x = x;
-        rect->position.y = y;
-
-        rect->scale.x = w;
-        rect->scale.y = h;
-
-        rect->color.r = r;
-        rect->color.g = g;
-        rect->color.b = b;
-        rect->color.a = a;
-
-        rectInit(rect, shader);
-    }
-}
-
 void genRectVertices(Rect* rect) {
     float r = rect->color.r;
     float g = rect->color.g;
@@ -66,9 +47,8 @@ void genRectVertices(Rect* rect) {
     rect->indices[5] = 1;
 }
 
-void rectInit(Rect* rect, Shader* shader) {
+void rectInit(Rect* rect) {
     rect->wasInitialized = 1;
-    rect->shader = shader;
     genRectVertices(rect);
 
     glGenVertexArrays(1, &rect->VAO);

@@ -4,7 +4,7 @@
 #include "rect.h"
 
 // Checks for aabb collision between 2 rects
-int AABB(Rect rect1, Rect rect2);
+int AABBCollision(const Rect rect1, const Rect rect2);
 
 
 #endif /* ifndef AABB_H */

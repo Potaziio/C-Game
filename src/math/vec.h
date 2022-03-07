@@ -14,12 +14,15 @@ typedef struct {
 iVec2f iVec2fMultV(iVec2f vec, iVec2f vec2);
 iVec2f iVec2fMultF(iVec2f vec, float val);
 
+int iVec2fCmp(iVec2f vec1, iVec2f vec2);
+
 float iVec2fDist(iVec2f vec1, iVec2f vec2);
 
 iVec2f iVec2fSumV(iVec2f vec, iVec2f vec2);
 
 void iVec2fNorm(iVec2f* vec);
 void iVec2fIncV(iVec2f* vec, iVec2f vec2);
+void iVec2fDecV(iVec2f* vec, iVec2f vec2);
 
 float iVec2fMag(iVec2f vec);
 

@@ -3,82 +3,108 @@
 Shader shader;
 Shader texturedShader;
 
-// TODO: Implement textures
+// TODO: Finish collision resolution
 // TODO: Create static object batching,
-
-Rect Player = {
-    .position = { 0.0f, 0.0f },
-    .scale = { 20.0f, 20.0f },
-    .color = { RGBANORM(255.0f, 255.0f, 255.0f, 255.0f) }
-};
 
 Rect Enemy = {
     .position = { -2500.0f, 300.0f },
-    .scale = { 2500.0f, 25.0f },
-    .color = { RGBANORM(255.0f, 0.0f, 0.0f, 255.0f)},
+    .scale = { 2500.0f, 50.0f },
+    .color = { RGBANORM(255.0f, 255.0f, 0.0f, 255.0f) },
+    .isAABB = 1,
+    .shader = &shader
+};
+
+Rect Floor = { 
+    .position = { -2500.0f, 390.0f },
+    .scale = { 2500.0f, 50.0f },
+    .color = { RGBANORM(255.0f, 0.0f, 255.0f, 255.0f ) }, 
+    .isAABB = 1,
+    .shader = &shader
+};
+
+TexturedRect rect = {
+    .position = { 0.0f, 0.0f },
+    .scale = { 100.0f, 100.0f },
+    .sprite = (Texture){ .filepath = "../assets/textures/awesomeface.jpg" },
 };
 
 Shader* shaders[] = {
-    &shader
+    &shader,
+    &texturedShader
 };
+
+void gameSetWindow(Game* game, struct Window* window) {
+    game->window = window;
+}
 
 void gameStart(Game* game) {
     shaderInit(&shader, "../assets/shaders/square.vs", 
             "../assets/shaders/square.fs");
+    shaderInit(&texturedShader, "../assets/shaders/texturedrect.vs", 
+            "../assets/shaders/texturedrect.fs");
+    playerInit(&game->player, &game->camera, &shader);
+    
+    texturedRectInit(&rect, &texturedShader);
 
-    rectInit(&Player, &shader);
-    rectInit(&Enemy, &shader);
+    AllocRectArray(&game->entities, 0);
+    PushToRectArray(&game->entities, &game->player.rect);
+    PushToRectArray(&game->entities, &Enemy);
+    PushToRectArray(&game->entities, &Floor);
 }
 
-bool AABBCollision(Rect a, Rect b) {
-    return a.position.x + a.scale.x > b.position.x &&
-        a.position.x < b.position.x + b.scale.x && 
-        a.position.y + a.scale.y > b.position.y && 
-        a.position.y < b.position.y + b.scale.y;
-}
+iVec2f playerLastPos;
 
-float yAccel = 0.0f;
+void gameResolveAllCollisions(Player* player, DRectArray entities) {
+    for (int i = 0; i < entities.size; i++) {
+        if (entities.array[i] == &player->rect) { continue; }
+
+        if (AABBCollision(player->rect, *entities.array[i])) {
+
+
+            iVec2f res = { player->rect.position.x - playerLastPos.x, 
+                player->rect.position.y - playerLastPos.y };
+
+            player->rect.position.x -= res.x;
+        }
+
+        if (AABBCollision(player->rect, *entities.array[i])) {
+            iVec2f res = { player->rect.position.x - playerLastPos.x, 
+                player->rect.position.y - playerLastPos.y };
+
+            player->rect.position.y -= res.y;
+        }   
+    }
+}
 
 void gameUpdate(Game* game) {
-    glClearColor(0.1f, 0.1f, 0.1f, 255.0f);
-    iVec2f movement = { InputGetAxisRaw("Horizontal"), 0.0f };
-    iVec2fNorm(&movement);
-	
-    iVec2fIncV(&Player.position, iVec2fMultF(iVec2fMultF(movement, 
-                    deltaTime(game->time)), 500.0f));
+    game->window->color = (NormColor){ 0.1f, 0.1f, 0.1f, 0.1f };
 
-    if (AABBCollision(Player, Enemy)) {
-        if (movement.x > 0.0f) {
-            Player.position.x = Enemy.position.x - Player.scale.x;
-        } else if (movement.x < 0.0f) {
-            Player.position.x = Enemy.position.x + Enemy.scale.x;
-        }
+    playerUpdate(&game->player, deltaTime(game->time));
+
+    // Do physics update here
+
+    gameResolveAllCollisions(&game->player, game->entities);
+
+    Rect r = { 
+        .scale = { 50.0f, 50.0f }, 
+        .color = RandomNormColor(),
+        .isAABB = 1,
+        .shader = &shader,
+    };
+
+    if (InputMouseButtonDown(0)) {
+        iVec2f position;
+        InputGetMousePos(&position.x, &position.y);
+        r.position = position;
+        rectInit(&r);
+        PushToRectArray(&game->entities, &r);
     }
 
-    Player.position.y -= yAccel;
-    yAccel -= deltaTime(game->time) * 9.81 / 1.5;
+    playerLastPos = game->player.rect.position;
 
-    if (AABBCollision(Player, Enemy)) {
-        if (movement.y < 0.0f) {
-            Player.position.y = Enemy.position.y + Enemy.scale.y; 
-        } else if (movement.y > 0.0f) {
-            Player.position.y = Enemy.position.y - Player.scale.y;
-        }
-
-        yAccel = 0.0f;
-    }
-
-    iVec2f cameraPos = { game->camera.x, game->camera.y };
-    iVec2f cameraTarget = { (Player.position.x + 30.0f) - game->camera.boundsX * 0.5f, (Player.position.y + 10.0f) - game->camera.boundsY * 0.5f};
-    iVec2f lerpPos = iVec2fLerp(cameraPos, cameraTarget, 5.0f * deltaTime(game->time));
-
-    game->camera.x = lerpPos.x;
-    game->camera.y = lerpPos.y;
+    cameraUpdate(&game->camera, shaders, 2);
 	
-    cameraUpdate(&game->camera, shaders, 1);
-	
-    rectRender(&Player);
-    rectRender(&Enemy);
+    texturedRectRender(&rect);
 }
 
 void freeGameMemory(Game* game) {

@@ -8,13 +8,14 @@
 
 #include "../math/vec.h"
 #include "../shader/shader.h"
-#include "../util/util.h"
+#include "../util/color.h"
 
 typedef struct {
     iVec2f position, scale;
-    RGBA_Color color;
+    NormColor color;
 
     int wasInitialized;
+    int isAABB;
 
     float vertices[28];
     unsigned int indices[6];
@@ -26,8 +27,7 @@ typedef struct {
 } Rect;
 
 void genRectVertices(Rect* rect);
-void rectInit(Rect* rect, Shader* shader);
+void rectInit(Rect* rect);
 void rectRender(Rect* rect);
-void createRect(Rect* rect, Shader* shader, float x, float y, float w, float h, float r, float g, float b, float a);
 
 #endif /* ifndef RECT_H */
